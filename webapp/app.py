@@ -1,5 +1,4 @@
 import os
-import cv2
 import csv
 import time
 import base64
@@ -14,6 +13,13 @@ from email.mime.multipart import MIMEMultipart
 
 from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 from authlib.integrations.flask_client import OAuth
+
+# Try to import OpenCV - required for production but can be deferred
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+    print("WARNING: OpenCV not installed. Image detection will not work.")
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -74,9 +80,15 @@ GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 DEFAULT_RECIPIENT_EMAIL = os.environ.get("DEFAULT_RECIPIENT_EMAIL", "")
 
 # ---- ArUco Detector Setup ----
-aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-params = cv2.aruco.DetectorParameters()
-detector = cv2.aruco.ArucoDetector(aruco_dict, params)
+if cv2 is not None:
+    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+    params = cv2.aruco.DetectorParameters()
+    detector = cv2.aruco.ArucoDetector(aruco_dict, params)
+else:
+    aruco_dict = None
+    params = None
+    detector = None
+    print("WARNING: ArUco detector not initialized. OpenCV is required for marker detection.")
 dose_names = {0: "Morning", 1: "Afternoon", 2: "Night"}
 
 # Marker state tracking & debounce
@@ -325,6 +337,9 @@ def detect():
         return jsonify({"status": "error", "message": "Invalid image payload"})
 
     try:
+        if cv2 is None or detector is None:
+            return jsonify({"status": "error", "message": "OpenCV not available. Image detection cannot be performed."})
+        
         header, encoded = data.split(",", 1)
         img_bytes = base64.b64decode(encoded)
         img_array = np.frombuffer(img_bytes, dtype=np.uint8)
