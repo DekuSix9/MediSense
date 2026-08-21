@@ -1,7 +1,7 @@
 Flask==2.3.2
 Flask-Login==0.6.2
 Authlib==1.2.1
-opencv-contrib-python==4.8.1.78
+opencv-python==4.8.1.78
 pandas==2.0.3
 numpy==1.24.3
 scikit-learn==1.3.0
