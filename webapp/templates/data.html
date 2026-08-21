@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediSense - Data Logs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <a href="/dashboard" class="brand">
+            <div class="brand-icon">M</div>
+            <div class="brand-text">Medi<span>Sense</span></div>
+        </a>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/data" class="nav-link active">Data Logs</a>
+            <div class="user-badge">
+                <div class="user-avatar">{{ user_email[0].upper() if user_email else 'U' }}</div>
+                <span>{{ user_email }}</span>
+            </div>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2>📋 Live Data Logs & Status</h2>
+            <a href="/data" class="btn btn-secondary">🔄 Refresh Data</a>
+        </div>
+
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <div class="card-title">
+                <span>💊 Dose Status Report (data/dose_status.csv)</span>
+            </div>
+            <div class="table-wrapper">
+                {{ status | safe }}
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="card-title">
+                <span>📜 Raw Events Log (logs/events.csv)</span>
+            </div>
+            <div class="table-wrapper">
+                {{ events | safe }}
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        MediSense Smart Medicine Box System &copy; 2026
+    </footer>
+</body>
+</html>

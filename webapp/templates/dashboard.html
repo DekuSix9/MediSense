@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediSense - Live Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <a href="/dashboard" class="brand">
+            <div class="brand-icon">M</div>
+            <div class="brand-text">Medi<span>Sense</span></div>
+        </a>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link active">Dashboard</a>
+            <a href="/data" class="nav-link">Data Logs</a>
+            <div class="user-badge">
+                <div class="user-avatar">{{ user_email[0].upper() if user_email else 'U' }}</div>
+                <span>{{ user_email }}</span>
+            </div>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-grid">
+            <!-- Left Side: Live Browser Camera Stream -->
+            <div class="glass-card">
+                <div class="card-title">
+                    <span>📹 Live Camera Monitoring</span>
+                </div>
+                <div class="video-container">
+                    <video id="camera" autoplay playsinline muted></video>
+                    <canvas id="snapshot" style="display:none;"></canvas>
+                    <div class="camera-overlay">
+                        <span id="camera-status" class="badge badge-info">Initializing Camera...</span>
+                        <span class="badge badge-info">Expected Dose: <strong id="expected-dose">{{ expected_dose or 'None' }}</strong></span>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                    The browser camera continuously captures frames and uploads them for server-side ArUco detection & lid tracking.
+                </p>
+            </div>
+
+            <!-- Right Side: Medicine Compartments Status -->
+            <div class="glass-card">
+                <div class="card-title">
+                    <span>💊 Compartment Status</span>
+                </div>
+                <div class="compartments-list">
+                    <div id="card-morning" class="compartment-card {% if expected_dose == 'Morning' %}active-window{% endif %}">
+                        <div class="dose-info">
+                            <h4>Morning Dose</h4>
+                            <p>Window: 05:00 AM – 11:59 AM | Marker ID: 0</p>
+                        </div>
+                        <span id="status-morning" class="dose-status {% if last_state and last_state.get('Morning') %}status-open{% else %}status-closed{% endif %}">
+                            {{ 'OPENED' if last_state and last_state.get('Morning') else 'CLOSED' }}
+                        </span>
+                    </div>
+
+                    <div id="card-afternoon" class="compartment-card {% if expected_dose == 'Afternoon' %}active-window{% endif %}">
+                        <div class="dose-info">
+                            <h4>Afternoon Dose</h4>
+                            <p>Window: 12:00 PM – 06:59 PM | Marker ID: 1</p>
+                        </div>
+                        <span id="status-afternoon" class="dose-status {% if last_state and last_state.get('Afternoon') %}status-open{% else %}status-closed{% endif %}">
+                            {{ 'OPENED' if last_state and last_state.get('Afternoon') else 'CLOSED' }}
+                        </span>
+                    </div>
+
+                    <div id="card-night" class="compartment-card {% if expected_dose == 'Night' %}active-window{% endif %}">
+                        <div class="dose-info">
+                            <h4>Night Dose</h4>
+                            <p>Window: 07:00 PM – 04:59 AM | Marker ID: 2</p>
+                        </div>
+                        <span id="status-night" class="dose-status {% if last_state and last_state.get('Night') %}status-open{% else %}status-closed{% endif %}">
+                            {{ 'OPENED' if last_state and last_state.get('Night') else 'CLOSED' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <a href="/data" class="btn btn-primary" style="flex: 1;">📊 View Event Logs & Status CSV</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        MediSense Smart Medicine Box System &copy; 2026
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+</body>
+</html>
